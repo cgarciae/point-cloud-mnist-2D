@@ -1,0 +1,4 @@
+name: point-cloud-mnist-2D
+
+dependencies:
+    - python=3.8
