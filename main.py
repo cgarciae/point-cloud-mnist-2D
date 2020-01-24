@@ -3,6 +3,10 @@ import numpy as np
 import idx2numpy
 from tqdm import tqdm
 import json
+import random
+
+np.random.seed(42)
+random.seed(420)
 
 
 def main(viz: bool = False):
