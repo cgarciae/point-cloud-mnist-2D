@@ -32,7 +32,7 @@ def main(viz: bool = False):
         suffix = "max" if length == max_length else length
 
         np.save(f"data/point-cloud-mnist-2D/X_train_{suffix}.npy", X_train_sample)
-        np.save(f"data/point-cloud-mnist-2D/X_test_{suffix}.npy", X_train_sample)
+        np.save(f"data/point-cloud-mnist-2D/X_test_{suffix}.npy", X_test_sample)
 
 
 def sample(X, k, name):
