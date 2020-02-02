@@ -25,9 +25,9 @@ def main(viz: bool = False):
 
     max_length = max(x.shape[0] for x in X_train + X_test)
 
-    X_train = pad(X_train, max_length, "train")
+    X_train = shuffle_and_pad(X_train, max_length, "train")
     X_train = X_train.reshape(X_train.shape[0], -1)
-    X_test = pad(X_test, max_length, "test")
+    X_test = shuffle_and_pad(X_test, max_length, "test")
     X_test = X_test.reshape(X_test.shape[0], -1)
 
     data_train = np.concatenate([y_train[:, None], X_train], axis=-1)
@@ -40,17 +40,19 @@ def main(viz: bool = False):
     df_test = pd.DataFrame(data_test[:, 1:], columns=columns[1:])
     test_labels = pd.DataFrame(data_test[:, :1], columns=columns[:1])
 
-    os.makedirs("data/point-cloud-mnist-2D", exist_ok=True)
+    print(df_train.label)
 
-    print("saving train")
-    df_train.to_csv("data/point-cloud-mnist-2D/train.csv", index=False)
-    print("saving test")
-    df_test.to_csv("data/point-cloud-mnist-2D/test.csv", index=False)
-    print("saving test labels")
-    test_labels.to_csv("data/point-cloud-mnist-2D/test_labels.csv", index=False)
+    # os.makedirs("data/point-cloud-mnist-2D", exist_ok=True)
+
+    # print("saving train")
+    # df_train.to_csv("data/point-cloud-mnist-2D/train.csv", index=False)
+    # print("saving test")
+    # df_test.to_csv("data/point-cloud-mnist-2D/test.csv", index=False)
+    # print("saving test labels")
+    # test_labels.to_csv("data/point-cloud-mnist-2D/test_labels.csv", index=False)
 
 
-def pad(X, k, name):
+def shuffle_and_pad(X, k, name):
 
     samples = []
 
@@ -58,6 +60,8 @@ def pad(X, k, name):
 
     for x in tqdm(X, desc=f"Padding {name}_{k}"):
         N = len(x)
+
+        np.random.shuffle(x)
 
         if N < k:
             x = np.concatenate([x, np.tile(padding, (k - N, 1))])
