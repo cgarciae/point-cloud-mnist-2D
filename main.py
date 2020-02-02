@@ -1,9 +1,12 @@
-import typer
-import numpy as np
-import idx2numpy
-from tqdm import tqdm
 import json
+import os
 import random
+
+import idx2numpy
+import numpy as np
+import pandas as pd
+import typer
+from tqdm import tqdm
 
 np.random.seed(42)
 random.seed(420)
@@ -22,33 +25,41 @@ def main(viz: bool = False):
 
     max_length = max(x.shape[0] for x in X_train + X_test)
 
-    np.save(f"data/point-cloud-mnist-2D/y_train.npy", y_train)
-    np.save(f"data/point-cloud-mnist-2D/y_test.npy", y_test)
+    X_train = pad(X_train, max_length, "train")
+    X_train = X_train.reshape(X_train.shape[0], -1)
+    X_test = pad(X_test, max_length, "test")
+    X_test = X_test.reshape(X_test.shape[0], -1)
 
-    for length in [50, 100, 200, max_length]:
-        X_train_sample = sample(X_train, length, "train")
-        X_test_sample = sample(X_test, length, "test")
+    data_train = np.concatenate([y_train[:, None], X_train], axis=-1)
+    data_test = np.concatenate([y_test[:, None], X_test], axis=-1)
 
-        suffix = "max" if length == max_length else length
+    columns = [[f"x{i}", f"y{i}", f"v{i}"] for i in range(max_length)]
+    columns = ["label"] + sum(columns, [])
 
-        np.save(f"data/point-cloud-mnist-2D/X_train_{suffix}.npy", X_train_sample)
-        np.save(f"data/point-cloud-mnist-2D/X_test_{suffix}.npy", X_test_sample)
+    df_train = pd.DataFrame(data_train, columns=columns)
+    df_test = pd.DataFrame(data_test[:, 1:], columns=columns[1:])
+    test_labels = pd.DataFrame(data_test[:, :1], columns=columns[:1])
+
+    os.makedirs("data/point-cloud-mnist-2D", exist_ok=True)
+
+    print("saving train")
+    df_train.to_csv("data/point-cloud-mnist-2D/train.csv", index=False)
+    print("saving test")
+    df_test.to_csv("data/point-cloud-mnist-2D/test.csv", index=False)
+    print("saving test labels")
+    test_labels.to_csv("data/point-cloud-mnist-2D/test_labels.csv", index=False)
 
 
-def sample(X, k, name):
+def pad(X, k, name):
 
     samples = []
 
     padding = np.array([[-1, -1, -1]], dtype=np.int32)
 
-    for x in tqdm(X, desc=f"Sampling {name}_{k}"):
+    for x in tqdm(X, desc=f"Padding {name}_{k}"):
         N = len(x)
-        p = x[:, 2] / x[:, 2].sum()
 
-        if N > k:
-            idx = np.random.choice(N, k, p=p, replace=False)
-            x = x[idx]
-        elif N < k:
+        if N < k:
             x = np.concatenate([x, np.tile(padding, (k - N, 1))])
 
         samples.append(x)
