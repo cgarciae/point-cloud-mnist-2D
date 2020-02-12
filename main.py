@@ -37,19 +37,17 @@ def main(viz: bool = False):
     columns = ["label"] + sum(columns, [])
 
     df_train = pd.DataFrame(data_train, columns=columns)
-    df_test = pd.DataFrame(data_test[:, 1:], columns=columns[1:])
+    df_test = pd.DataFrame(data_test, columns=columns)
     test_labels = pd.DataFrame(data_test[:, :1], columns=columns[:1])
 
-    print(df_train.label)
+    os.makedirs("data/point-cloud-mnist-2D", exist_ok=True)
 
-    # os.makedirs("data/point-cloud-mnist-2D", exist_ok=True)
-
-    # print("saving train")
-    # df_train.to_csv("data/point-cloud-mnist-2D/train.csv", index=False)
-    # print("saving test")
-    # df_test.to_csv("data/point-cloud-mnist-2D/test.csv", index=False)
-    # print("saving test labels")
-    # test_labels.to_csv("data/point-cloud-mnist-2D/test_labels.csv", index=False)
+    print("saving train")
+    df_train.to_csv("data/point-cloud-mnist-2D/train.csv", index=False)
+    print("saving test")
+    df_test.to_csv("data/point-cloud-mnist-2D/test.csv", index=False)
+    print("saving test labels")
+    test_labels.to_csv("data/point-cloud-mnist-2D/test_labels.csv", index=False)
 
 
 def shuffle_and_pad(X, k, name):
